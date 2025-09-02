@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 class Visualiser:
   @staticmethod
@@ -11,8 +12,9 @@ class Visualiser:
       raise ValueError("image_stack must be a 3D numpy array (num_images, height, width) or 2D (height, width).")
     
     num_images = image_stack.shape[0]
+    image_shape = image_stack.shape[1:]
     if layout == "row":
-      _fig, axes = plt.subplots(1, num_images, figsize=(4 * num_images, 4))
+      _fig, axes = plt.subplots(1, num_images, figsize=(4 * num_images, 0.5 + 4 * image_shape[0] / image_shape[1]))
     elif layout == "square":
       cols = int(np.ceil(np.sqrt(num_images)))
       rows = int(np.ceil(num_images / cols))
@@ -25,12 +27,12 @@ class Visualiser:
 
     for i in range(num_images):
       im = axes[i].imshow(image_stack[i], cmap=cmap)
-      axes[i].axis('off')
       axes[i].set_title(f"Image {i+1}")
-      plt.colorbar(im, ax=axes[i], fraction=0.046, pad=0.04)
-    
-    for i in range(num_images, len(axes)):
-      axes[i].axis('off')
+      # plt.colorbar(im, ax=axes[i], fraction=0.046, pad=0.04)
+      divider = make_axes_locatable(axes[i])
+      cax = divider.append_axes("right", size="5%", pad=0.05)
+        
+      plt.colorbar(im, cax=cax)
     
     plt.suptitle(title)
     plt.tight_layout()

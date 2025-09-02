@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: Image-Process-Pipeline
+Version: 1.0
+Summary: A modular image processing pipeline framework in Python. Designed to work with image like data files.
+Home-page: 
+Author: Kevin Kleinbeck, Emma Crean
+Author-email: KeKleinbeck@gmail.com, Emma.Crean@tum.de
+License-File: LICENSE
+Dynamic: author
+Dynamic: author-email
+Dynamic: license-file
+Dynamic: summary

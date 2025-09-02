@@ -1,0 +1,6 @@
+data/
+examples/
+notebooks/
+Chip_Analysis.egg-info/
+*/__pycache__/
+*.pyc

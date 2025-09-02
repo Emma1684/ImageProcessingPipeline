@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from chip_analysis.pipeline_framework.data_manager import DataManager
-
 process_steps = {}
 
 class AbstractProcessStep(ABC):
@@ -11,16 +9,13 @@ class AbstractProcessStep(ABC):
   options: dict[str, tuple[type, any]] = {}
 
   def __init__(self,
-               data_manager: DataManager,
                inputs: dict = None,
                options: dict = None,
                delivers_id_map: dict = None):
-    # TODO: remove data_manager from here. Inputs should be passed directly and deliverables returned.
-    self.data_manager = data_manager
     self.delivers_id_map = delivers_id_map or {}
-    # TODO: validate delivers_id_map keys
     self._verify_and_set_inputs(inputs or {})
     self._verify_and_set_options(options or {})
+    self._verify_deliverables_id_map()
   
   def _verify_and_set_inputs(self, provided_inputs: dict):
     """Check provided inputs against required schema and set them as attributes."""
@@ -40,7 +35,7 @@ class AbstractProcessStep(ABC):
 
     # Check types and assign attributes
     for key, expected_type in self.inputs.items():
-      obj = self.data_manager.get(provided_inputs[key])
+      obj = provided_inputs[key]
       if not isinstance(obj, expected_type):
         raise TypeError(
           f"Input '{key}' must be of type {expected_type.__name__}, "
@@ -79,12 +74,25 @@ class AbstractProcessStep(ABC):
     """Hook for subclasses to react to options being set."""
     pass
 
+  def _verify_deliverables_id_map(self):
+    required_keys = set(self.deliverables.keys())
+    provided_keys = set(self.delivers_id_map.keys())
+
+    # Check exact match
+    if required_keys != provided_keys:
+      missing = required_keys - provided_keys
+      extra = provided_keys - required_keys
+      msg = []
+      if missing:
+        msg.append(f"Missing deliverables: {', '.join(missing)}")
+      if extra:
+        msg.append(f"Unexpected deliverables: {', '.join(extra)}")
+      raise ValueError("Validation of provided deliverables failed. " + "; ".join(msg))
+
   def execute(self):
     self._execute()
     self._validate_deliverables()
-    self.data_manager.register({
-      self.delivers_id_map[d]: getattr(self, d) for d in self.deliverables
-    })
+    return {self.delivers_id_map[d]: getattr(self, d) for d in self.deliverables}
   
   @abstractmethod
   def _execute(self):

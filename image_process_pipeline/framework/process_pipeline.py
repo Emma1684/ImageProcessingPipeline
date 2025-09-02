@@ -1,10 +1,10 @@
 import copy, yaml
 from pathlib import Path
 
-from image_process_pipeline.pipeline_framework.config import FrameworkConfig
-from image_process_pipeline.pipeline_framework.serilisable_inputs import SerialisableInputs
-from image_process_pipeline.pipeline_framework.data_manager import data_managers
-from image_process_pipeline.pipeline_framework.process_step import process_steps
+from image_process_pipeline.framework.config import FrameworkConfig
+from image_process_pipeline.framework.serilisable_inputs import SerialisableInputs
+from image_process_pipeline.framework.data_manager import data_managers
+from image_process_pipeline.framework.process_step import process_steps
 
 from image_process_pipeline.processes import *  # Ensure all processes are registered
 
@@ -153,17 +153,17 @@ class ProcessPipeline(SerialisableInputs):
         raise ValueError(f"Unknown ProcessStep '{process_name}' in step {idx}")
 
       # Prepare kwargs for instantiation
-      kwargs = {"data_manager": self.data_manager}
-      kwargs["delivers_id_map"] = step_config["Deliverables"]
+      kwargs = {"delivers_id_map": step_config["Deliverables"]}
       if "Inputs" in step_config:
-        kwargs["inputs"] = step_config["Inputs"]
+        kwargs["inputs"] = {k: self.data_manager.get(v) for k, v in step_config["Inputs"].items()}
       if "Options" in step_config:
         kwargs["options"] = step_config["Options"]
 
       # Instantiate and execute
       process_class = process_steps[process_name]
       current_process = process_class(**kwargs)
-      current_process.execute()
+      deliverables = current_process.execute()
+      self.data_manager.register(deliverables)
   
   def serialise(self, path: Path):
     pass

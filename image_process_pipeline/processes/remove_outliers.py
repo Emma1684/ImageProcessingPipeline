@@ -1,6 +1,6 @@
 import numpy as np
 
-from image_process_pipeline.pipeline_framework.process_step import AbstractProcessStep, process_steps
+from image_process_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
 class RemoveOutliers(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}

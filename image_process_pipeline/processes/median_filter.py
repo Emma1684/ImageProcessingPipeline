@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import median_filter
 
-from image_process_pipeline.pipeline_framework.process_step import AbstractProcessStep, process_steps
+from image_process_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
 class MedianFilter(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}
