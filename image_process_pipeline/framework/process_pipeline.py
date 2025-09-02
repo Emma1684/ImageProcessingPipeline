@@ -17,7 +17,7 @@ class ProcessPipeline(SerialisableInputs):
 
   optional_inputs = {
     "data_manager_type": (str, "native"),
-    "framework_config": (dict, FrameworkConfig()),
+    "framework_config": (FrameworkConfig, FrameworkConfig()),
   }
 
   def on_init(self):

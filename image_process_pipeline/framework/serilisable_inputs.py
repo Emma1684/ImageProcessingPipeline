@@ -3,36 +3,21 @@ import git, h5py
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from image_process_pipeline.framework.typed_data_interface import TypedDataInterface
 
-class SerialisableInputs(ABC):
+
+class SerialisableInputs(ABC, TypedDataInterface):
   required_inputs: dict[str, type] = {}
   optional_inputs: dict[str, tuple[type, object]] = {}
 
   def __init__(self, **kwargs):
     # Validate required inputs
-    for key, expected_type in self.required_inputs.items():
-      if key not in kwargs:
-        raise ValueError(f"Missing required input: '{key}'")
-      if not isinstance(kwargs[key], expected_type):
-        raise TypeError(
-          f"Input '{key}' must be of type {expected_type.__name__}, "
-          f"got {type(kwargs[key]).__name__}"
-        )
-    
-    # Handle optional inputs
-    for key, (expected_type, default_value) in self.optional_inputs.items():
-      if key in kwargs:
-        if not isinstance(kwargs[key], expected_type):
-          raise TypeError(
-            f"Optional input '{key}' must be of type {expected_type.__name__}, "
-            f"got {type(kwargs[key]).__name__}"
-          )
-      else:
-        setattr(self, key, default_value)
-
-    # Store kwargs as attributes
-    for key, value in kwargs.items():
-      setattr(self, key, value)
+    unhandled_kwargs = self.verify_and_add(
+      self.required_inputs, kwargs, source="Inputs", extra_okay=True
+    )
+    self.verify_and_add(
+      self.optional_inputs, unhandled_kwargs, source="Optionals"
+    )
     
     self.on_init()
     # self.serialise()
