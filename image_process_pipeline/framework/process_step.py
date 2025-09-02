@@ -1,3 +1,5 @@
+import re
+
 from abc import ABC, abstractmethod
 
 process_steps = {}
@@ -82,12 +84,33 @@ class AbstractProcessStep(ABC):
     if required_keys != provided_keys:
       missing = required_keys - provided_keys
       extra = provided_keys - required_keys
+
+      # Address for regex deliverables
+      for m in missing.copy():
+        required_type = self.deliverables[m]
+        for e in extra.copy():
+          match = re.match(m, e)
+          if match:
+            # Register resolved deliverable and update the dict / sets
+            if m in self.deliverables:
+              del self.deliverables[m]
+            self.deliverables[e] = required_type
+            missing.discard(m)
+            extra.remove(e)
+      
       msg = []
       if missing:
         msg.append(f"Missing deliverables: {', '.join(missing)}")
       if extra:
         msg.append(f"Unexpected deliverables: {', '.join(extra)}")
-      raise ValueError("Validation of provided deliverables failed. " + "; ".join(msg))
+      if msg:
+        raise ValueError("Validation of provided deliverables failed. " + "; ".join(msg))
+    
+    self._on_verify_deliverables()
+  
+  def _on_verify_deliverables(self):
+    """Hook for subclasses to react to options being set."""
+    pass
 
   def execute(self):
     self._execute()
