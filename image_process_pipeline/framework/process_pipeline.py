@@ -1,12 +1,13 @@
-import copy, yaml
+import copy, math, yaml
 from pathlib import Path
 
 from image_process_pipeline.framework.config import FrameworkConfig
+from image_process_pipeline.framework.process_data import ProcessDataRegistry
 from image_process_pipeline.framework.serilisable_inputs import SerialisableInputs
 from image_process_pipeline.framework.data_manager import data_managers
 from image_process_pipeline.framework.process_step import process_steps
 
-from image_process_pipeline.processes import *  # Ensure all processes are registered
+from image_process_pipeline.processes import * # Ensure all processes are registered
 
 class ProcessPipeline(SerialisableInputs):
   required_inputs = {
@@ -136,34 +137,67 @@ class ProcessPipeline(SerialisableInputs):
           f"that was already defined earlier. Details: {e}"
         )
 
+    if "Serialisations" in self.config:
+      self._validate_pipeline_serialisation(dm_copy)
+
     return steps
+  
+  def _validate_pipeline_serialisation(self, dm_copy):
+    serialisations = self.config["Serialisations"]
+    serialisation_targets = set()
+    for serialisation in serialisations:
+      serialisation_targets.update(set(serialisation["Data"]))
+
+    for target in serialisation_targets.copy():
+      if dm_copy.contains(target):
+        serialisation_targets.remove(target)
+    
+    assert len(serialisation_targets) == 0, \
+      f"Config tries to serialise\n\t{serialisation_targets},\nwhich aren't provided by any step."
   
   def run(self):
     total_steps = len(self.pipeline_steps)
-    width = self.framework_config.execution_settings.get("counter_width", 3)
+    width = self.framework_config.execution_settings["counter_width"] or \
+      math.floor(math.log10(total_steps) + 1)
 
-    for idx, step_config in enumerate(self.pipeline_steps, start=1):
-      display_id = step_config["DisplayId"]
-      process_name = step_config["ProcessStep"]
+    try:
+      for idx, step_config in enumerate(self.pipeline_steps, start=1):
+        display_id = step_config["DisplayId"]
+        process_name = step_config["ProcessStep"]
 
-      # Print formatted step info
-      print(f"[{idx:>{width}}/{total_steps:{width}}] Executing: {display_id}")
+        # Print formatted step info
+        print(f"[{idx:>{width}}/{total_steps:{width}}] Executing: {display_id}")
 
-      if process_name not in process_steps:
-        raise ValueError(f"Unknown ProcessStep '{process_name}' in step {idx}")
+        if process_name not in process_steps:
+          raise ValueError(f"Unknown ProcessStep '{process_name}' in step {idx}")
 
-      # Prepare kwargs for instantiation
-      kwargs = {"delivers_id_map": step_config["Deliverables"]}
-      if "Inputs" in step_config:
-        kwargs["inputs"] = {k: self.data_manager.get(v) for k, v in step_config["Inputs"].items()}
-      if "Options" in step_config:
-        kwargs["options"] = step_config["Options"]
+        # Prepare kwargs for instantiation
+        kwargs = {"delivers_id_map": step_config["Deliverables"]}
+        if "Inputs" in step_config:
+          kwargs["inputs"] = {k: self.data_manager.get(v) for k, v in step_config["Inputs"].items()}
+        if "Options" in step_config:
+          kwargs["options"] = step_config["Options"]
 
-      # Instantiate and execute
-      process_class = process_steps[process_name]
-      current_process = process_class(**kwargs)
-      deliverables = current_process.execute()
-      self.data_manager.register(deliverables)
+        # Instantiate and execute
+        process_class = process_steps[process_name]
+        current_process = process_class(**kwargs)
+        deliverables = current_process.execute()
+        self.data_manager.register(deliverables)
+    except Exception as e:
+      raise e
+    finally:
+      print("[" + (2*width + 1)*"=" + "] Saving results")
+      
+      pdr = ProcessDataRegistry()
+      serialisation_targets = self.config["Serialisations"]
+      for target in serialisation_targets:
+        target_dir = self.output_dir / target["RelativeOutputPath"]
+        target_dir.mkdir(exist_ok=True, parents=True)
+
+        for data in target["Data"]:
+          if self.data_manager.contains(data):
+            obj = self.data_manager.get(data)
+            pdr.save(obj, name = data, dir = target_dir)
   
   def serialise(self, path: Path):
     pass

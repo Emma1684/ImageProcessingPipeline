@@ -79,7 +79,16 @@ class ProcessTiffData(ProcessData):
     Save the numpy array as a TIFF file.
     """
     tif_path = dir / f"{self.name}.tif"
-    tiff.imwrite(tif_path, self.data, photometric='minisblack')
+    if "int" in str(self.data.dtype):
+      int_type = "uint8" if np.max(self.data) < 256 else "uint16"
+      tiff.imwrite(tif_path, self.data.astype(int_type), photometric='minisblack')
+    elif "float" in str(self.data.dtype):
+      tiff.imwrite(tif_path, self.data.astype("float32"), photometric='minisblack')
+    else:
+      raise TypeError(
+        f"Cannot serialise result {self.name} of type {self.data.dtype}. " +
+        "Supported are float and int types."
+      )
     return str(tif_path)
 
   @staticmethod
