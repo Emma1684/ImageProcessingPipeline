@@ -3,9 +3,6 @@ import re
 from typing import Union
 
 class TypedDataInterface:
-  def __init__(self):
-    self.added_fields = {}
-
   def verify_ids(self, reference: dict[str, Union[type, tuple]], data: dict, source: str = "Field", extra_okay: bool = False):
     """
     Check the keys in the reference against the data.
@@ -48,7 +45,6 @@ class TypedDataInterface:
     self.verify_ids(reference, data, source=source, extra_okay=extra_okay)
 
     # Check types and assign attributes
-    self.added_fields.setdefault(source, set())
     for key, expected_type in reference.items():
       if isinstance(expected_type, tuple): # tuple[type, default_value]
         expected_type, default_value = expected_type
@@ -60,7 +56,6 @@ class TypedDataInterface:
           f"got {type(obj).__name__}"
         )
       setattr(self, key, obj)
-      self.added_fields[source].add(key)
 
     if extra_okay:
       extras = {k: data[k] for k in data if k not in reference}

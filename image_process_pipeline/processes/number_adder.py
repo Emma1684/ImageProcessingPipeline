@@ -15,7 +15,7 @@ class NumberAdder(AbstractProcessStep):
     """
     self.sum = self.extra_summand
 
-    for field_name in self.added_fields["Inputs"]:
+    for field_name in self.inputs_actual:
       if not re.match(r"number_\d+", field_name): continue
       self.sum += getattr(self, field_name)
 

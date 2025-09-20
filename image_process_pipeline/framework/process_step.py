@@ -16,13 +16,17 @@ class AbstractProcessStep(ABC, TypedDataInterface):
                inputs: dict = None,
                options: dict = None,
                delivers_id_map: dict = None):
-    super().__init__()    
+    # Create copies to avoid modification of class variables
+    self.inputs_actual = self.inputs.copy()
+    self.deliverables_actual = self.deliverables.copy()
+    self.options_actual = self.options.copy()
+
     self.delivers_id_map = delivers_id_map or {}
-    self.verify_and_add(self.inputs, inputs or {}, source="Inputs")
+    self.verify_and_add(self.inputs_actual, inputs or {}, source="Inputs")
     self._on_set_inputs() # Provide hook for sub classes
-    self.verify_and_add(self.options, options or {}, source="Options")
+    self.verify_and_add(self.options_actual, options or {}, source="Options")
     self._on_set_options() # Provide hook for sub classes
-    self.verify_ids(self.deliverables, self.delivers_id_map, source="Deliverables")
+    self.verify_ids(self.deliverables_actual, self.delivers_id_map, source="Deliverables")
     self._on_verify_deliverables() # Provide hook for sub classes
 
   def _on_set_inputs(self):
@@ -40,7 +44,7 @@ class AbstractProcessStep(ABC, TypedDataInterface):
   def execute(self):
     self._execute()
     self._validate_deliverables()
-    return {self.delivers_id_map[d]: getattr(self, d) for d in self.deliverables}
+    return {self.delivers_id_map[d]: getattr(self, d) for d in self.deliverables_actual}
   
   @abstractmethod
   def _execute(self):
@@ -48,7 +52,7 @@ class AbstractProcessStep(ABC, TypedDataInterface):
   
   def _validate_deliverables(self):
     """Check that deliverables exist as attributes and match expected types."""
-    for key, expected_type in self.deliverables.items():
+    for key, expected_type in self.deliverables_actual.items():
       if not hasattr(self, key):
         raise AttributeError(f"Deliverable '{key}' is missing as an attribute.")
       val = getattr(self, key)

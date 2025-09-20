@@ -16,7 +16,7 @@ class CombineOffsets(AbstractProcessStep):
     v_offset = self.extra_vertical
     h_offset = self.extra_horizontal
 
-    for field_name in self.added_fields["Inputs"]:
+    for field_name in self.inputs_actual:
       if not re.match(r"offset_\d+", field_name): continue
 
       offset = getattr(self, field_name)
