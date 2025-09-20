@@ -12,8 +12,8 @@ class CullBoundary(AbstractProcessStep):
     "left": ((int, float), 0),
     "right": ((int, float), 0),
     "width": ((int, float), 0),
-    "height": ((int, float), 0),
-    # TODO: implement width and height options
+    "height": (int | float, 0),
+    "offset": (tuple | None, None)
   }
 
   def _on_set_options(self):
@@ -30,6 +30,14 @@ class CullBoundary(AbstractProcessStep):
         setattr(self, option, pixel_value)
       else:
         assert isinstance(value, int) and 0 <= value, f"Integer option {option} must be a non-negative integer."
+
+    # Guarantee: If Offset is set, this does not clash with other parameters
+    if self.offset is not None:
+      assert self.top == 0 and self.left == 0, \
+        f"Got option `offset` ({self.offset}), and options `left` ({self.left}) and `top` ({self.top}).\n" + \
+        "Only one set must be provided"
+      self.top = self.offset[0]
+      self.left = self.offset[1]
 
     # Guarantee: If width and height is set, this does not clash with the other parameters
     if self.width != 0:

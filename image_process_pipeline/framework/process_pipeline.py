@@ -176,7 +176,10 @@ class ProcessPipeline(SerialisableInputs):
         if "Inputs" in step_config:
           kwargs["inputs"] = {k: self.data_manager.get(v) for k, v in step_config["Inputs"].items()}
         if "Options" in step_config:
-          kwargs["options"] = step_config["Options"]
+          kwargs["options"] = {
+            id: self.data_manager.get(val) if isinstance(val, str) and self.data_manager.contains(val) else val \
+              for id, val in step_config["Options"].items() # Read from data manager if id is present
+          }
 
         # Instantiate and execute
         process_class = process_steps[process_name]

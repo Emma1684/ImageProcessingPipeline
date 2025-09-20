@@ -16,6 +16,7 @@ class AbstractProcessStep(ABC, TypedDataInterface):
                inputs: dict = None,
                options: dict = None,
                delivers_id_map: dict = None):
+    super().__init__()    
     self.delivers_id_map = delivers_id_map or {}
     self.verify_and_add(self.inputs, inputs or {}, source="Inputs")
     self._on_set_inputs() # Provide hook for sub classes

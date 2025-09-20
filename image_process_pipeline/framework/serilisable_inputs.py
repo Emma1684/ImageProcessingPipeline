@@ -11,6 +11,7 @@ class SerialisableInputs(ABC, TypedDataInterface):
   optional_inputs: dict[str, tuple[type, object]] = {}
 
   def __init__(self, **kwargs):
+    super().__init__()
     # Validate required inputs
     unhandled_kwargs = self.verify_and_add(
       self.required_inputs, kwargs, source="Inputs", extra_okay=True
