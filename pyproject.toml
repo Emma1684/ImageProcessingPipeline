@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=80", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image_process_pipeline"
+dynamic = ["version"]
+authors = [
+  {name = "Kevin Kleinbeck", email = "KeKleinbeck@gmail.com"},
+  {name = "Emma Crean", email = "Emma.Crean@tum.de"}
+]
+description = "A modular image processing pipeline framework in Python. Designed to work with image like data files."
+dependencies = [
+  "h5py>=3.10",
+  "numpy>=2.0",
+  "tifffile>=2025.0",
+  "PyYAML>=6.0",
+  "matplotlib>=3.5",
+  "scipy>=1.10",
+]
+
+[project.urls]
+Github = "https://github.com/KKleinbeck/ImageProcessingPipeline"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["image_process_pipeline*"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"

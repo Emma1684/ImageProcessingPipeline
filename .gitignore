@@ -1,6 +1,8 @@
+build/
 data/
 examples/
 notebooks/
-Chip_Analysis.egg-info/
+image_process_pipeline.egg-info/
 */__pycache__/
 *.pyc
+*.egg-info

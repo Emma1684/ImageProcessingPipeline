@@ -1,4 +1,4 @@
-import git, h5py
+import h5py
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -24,38 +24,39 @@ class SerialisableInputs(ABC, TypedDataInterface):
 
   @classmethod
   def reload(cls, path: Path, permit_version_changes: bool = False):
-    if not path.exists():
-      raise FileNotFoundError(f"HDF5 file not found: {path}")
+    pass
+    # if not path.exists():
+    #   raise FileNotFoundError(f"HDF5 file not found: {path}")
 
-    with h5py.File(path, "r") as f:
-      if "git_version" not in f.attrs:
-        raise ValueError("HDF5 file missing required 'git_version' attribute.")
+    # with h5py.File(path, "r") as f:
+    #   if "git_version" not in f.attrs:
+    #     raise ValueError("HDF5 file missing required 'git_version' attribute.")
 
-      file_git_hash = f.attrs["git_version"]
+    #   file_git_hash = f.attrs["git_version"]
 
-      # Get local git hash
-      repo = git.Repo(search_parent_directories=True)
-      local_git_hash = repo.head.commit.hexsha
+    #   # Get local git hash
+    #   repo = git.Repo(search_parent_directories=True)
+    #   local_git_hash = repo.head.commit.hexsha
 
-      if file_git_hash != local_git_hash:
-        msg = (
-          f"Git version mismatch: file has {file_git_hash}, "
-          f"local repo is {local_git_hash}"
-        )
-        if permit_version_changes:
-          import warnings
-          warnings.warn(msg, UserWarning)
-        else:
-          raise ValueError(msg)
+    #   if file_git_hash != local_git_hash:
+    #     msg = (
+    #       f"Git version mismatch: file has {file_git_hash}, "
+    #       f"local repo is {local_git_hash}"
+    #     )
+    #     if permit_version_changes:
+    #       import warnings
+    #       warnings.warn(msg, UserWarning)
+    #     else:
+    #       raise ValueError(msg)
 
-      # Collect all non-version attributes
-      init_kwargs = {}
-      for key, val in f.attrs.items():
-        if key == "git_version":
-          continue
-        init_kwargs[key] = val
+    #   # Collect all non-version attributes
+    #   init_kwargs = {}
+    #   for key, val in f.attrs.items():
+    #     if key == "git_version":
+    #       continue
+    #     init_kwargs[key] = val
 
-    return cls(**init_kwargs)
+    # return cls(**init_kwargs)
 
   @abstractmethod
   def serialise(self, path: Path):

@@ -1,8 +1,0 @@
-LICENSE
-setup.py
-Image_Process_Pipeline.egg-info/PKG-INFO
-Image_Process_Pipeline.egg-info/SOURCES.txt
-Image_Process_Pipeline.egg-info/dependency_links.txt
-Image_Process_Pipeline.egg-info/top_level.txt
-image_process_pipeline/__init__.py
-image_process_pipeline/box_filter.py
