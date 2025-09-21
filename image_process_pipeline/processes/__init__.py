@@ -1,4 +1,6 @@
+import image_process_pipeline.processes.apply_mask
 import image_process_pipeline.processes.apply_morphologies
+import image_process_pipeline.processes.analyse_statistics
 import image_process_pipeline.processes.arithmetic_stack_operation
 import image_process_pipeline.processes.combine_offsets
 import image_process_pipeline.processes.cull_boundary
@@ -9,6 +11,7 @@ import image_process_pipeline.processes.fourier_denoise
 import image_process_pipeline.processes.generate_edge_mask
 import image_process_pipeline.processes.geometry_filter_masks
 import image_process_pipeline.processes.invert
+import image_process_pipeline.processes.load_stack
 import image_process_pipeline.processes.median_filter
 import image_process_pipeline.processes.normalise
 import image_process_pipeline.processes.number_adder

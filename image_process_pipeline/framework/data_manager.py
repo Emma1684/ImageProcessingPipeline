@@ -35,6 +35,7 @@ class DataManager:
       self._register_individual(id, data)
   
   def _register_individual(self, id: str, data):
+    if id == "_": return # Ignore placeholder
     if self.contains(id):
       raise KeyError(f"Data with id {id} already exists.")
     self._results[id] = data
