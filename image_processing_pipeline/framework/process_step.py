@@ -2,7 +2,7 @@ import re
 
 from abc import ABC, abstractmethod
 
-from image_process_pipeline.framework.typed_data_interface import TypedDataInterface
+from image_processing_pipeline.framework.typed_data_interface import TypedDataInterface
 
 process_steps = {}
 

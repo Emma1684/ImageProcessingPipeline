@@ -3,7 +3,7 @@ requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "image_process_pipeline"
+name = "image_processing_pipeline"
 dynamic = ["version"]
 authors = [
   {name = "Kevin Kleinbeck", email = "KeKleinbeck@gmail.com"},
@@ -24,7 +24,7 @@ Github = "https://github.com/KKleinbeck/ImageProcessingPipeline"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["image_process_pipeline*"]
+include = ["image_processing_pipeline*"]
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"

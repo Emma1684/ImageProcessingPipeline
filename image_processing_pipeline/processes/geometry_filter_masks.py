@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.ndimage as nd
 
-from image_process_pipeline.framework.process_step import AbstractProcessStep, process_steps
+from image_processing_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
 class GeometryFilterMasks(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}

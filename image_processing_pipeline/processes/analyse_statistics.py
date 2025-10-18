@@ -1,10 +1,10 @@
 import numpy as np
 
-from image_process_pipeline.framework.process_step import process_steps
-from image_process_pipeline.processes.apply_mask import ApplyMask
+from image_processing_pipeline.framework.process_step import process_steps
+from image_processing_pipeline.processes.apply_mask import ApplyMask
 
 class AnalyseStatistics(ApplyMask):
-  deliverables = {"mean": list, "std": list, r"q\d+": list}
+  deliverables = {"mean": list, "std": list, r"q\d+": list, "weight": list}
 
   # Inherit inputs, options, and validations from ApplyMask
 
@@ -34,12 +34,15 @@ class AnalyseStatistics(ApplyMask):
       combined_mask = np.any(self.mask_stack > 1, axis=0)
       self._get_mask_at_frame = lambda frame_idx: combined_mask # Override to always return the combined mask
 
-    self.mean, self.std = [], []
+    self.mean, self.std, self.weight = [], [], []
     for i in range(self.input_stack.shape[0]):
       mask = self._get_mask_at_frame(i)
       norm = np.sum(mask)
+      self.weight.append(float(norm))
+
       self.mean.append(float(np.sum(self.input_stack[i] * mask) / norm))
       self.std.append(float(np.sqrt(np.sum((self.input_stack[i] - self.mean[-1])**2 * mask) / norm)))
+
       for quantile in self.quantiles:
         self.quantiles[quantile].append(float(np.percentile(
           self.input_stack[i], quantile, weights=mask, method="inverted_cdf"

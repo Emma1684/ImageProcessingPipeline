@@ -1,13 +1,13 @@
 import copy, math, yaml
 from pathlib import Path
 
-from image_process_pipeline.framework.config import FrameworkConfig
-from image_process_pipeline.framework.process_data import ProcessDataRegistry
-from image_process_pipeline.framework.serilisable_inputs import SerialisableInputs
-from image_process_pipeline.framework.data_manager import data_managers
-from image_process_pipeline.framework.process_step import process_steps
+from image_processing_pipeline.framework.config import FrameworkConfig
+from image_processing_pipeline.framework.process_data import ProcessDataRegistry
+from image_processing_pipeline.framework.serilisable_inputs import SerialisableInputs
+from image_processing_pipeline.framework.data_manager import data_managers
+from image_processing_pipeline.framework.process_step import process_steps
 
-from image_process_pipeline.processes import * # Ensure all processes are registered
+from image_processing_pipeline.processes import * # Ensure all processes are registered
 
 class ProcessPipeline(SerialisableInputs):
   required_inputs = {

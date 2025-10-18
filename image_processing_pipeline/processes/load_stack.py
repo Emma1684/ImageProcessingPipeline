@@ -3,8 +3,8 @@ import tifffile as tiff
 
 from pathlib import Path
 
-from image_process_pipeline.framework.process_step import process_steps
-from image_process_pipeline.processes.cull_boundary import CullBoundary
+from image_processing_pipeline.framework.process_step import process_steps
+from image_processing_pipeline.processes.cull_boundary import CullBoundary
 
 class LoadStack(CullBoundary): # Inherit from CullBoundary to reuse its options
   inputs = {"input_path": Path}

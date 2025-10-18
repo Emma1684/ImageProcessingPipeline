@@ -3,7 +3,7 @@ import h5py
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from image_process_pipeline.framework.typed_data_interface import TypedDataInterface
+from image_processing_pipeline.framework.typed_data_interface import TypedDataInterface
 
 
 class SerialisableInputs(ABC, TypedDataInterface):

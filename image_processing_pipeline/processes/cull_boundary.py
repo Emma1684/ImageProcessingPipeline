@@ -1,6 +1,6 @@
 import numpy as np
 
-from image_process_pipeline.framework.process_step import AbstractProcessStep, process_steps
+from image_processing_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
 class CullBoundary(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}

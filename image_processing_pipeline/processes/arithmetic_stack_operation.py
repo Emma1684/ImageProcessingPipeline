@@ -1,6 +1,6 @@
 import numpy as np
 
-from image_process_pipeline.framework.process_step import AbstractProcessStep, process_steps
+from image_processing_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
 class ArithmeticStackOperation(AbstractProcessStep):
   inputs = {"stack_a": np.ndarray, "stack_b": np.ndarray}

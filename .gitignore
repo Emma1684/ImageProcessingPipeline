@@ -2,7 +2,7 @@ build/
 data/
 examples/
 notebooks/
-image_process_pipeline.egg-info/
+image_processing_pipeline.egg-info/
 */__pycache__/
 *.pyc
 *.egg-info
