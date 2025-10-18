@@ -4,7 +4,7 @@ from image_processing_pipeline.framework.process_step import AbstractProcessStep
 
 class Interpolate(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}
-  deliverables = {"interpolated_stack": np.ndarray, "interpolated_frames": np.ndarray}
+  deliverables = {"interpolated_stack": np.ndarray, "interpolated_frames": list}
 
   options = {'mode': (str, "common_footprint")}
 
@@ -64,10 +64,10 @@ class Interpolate(AbstractProcessStep):
     self.interpolated_stack = self.input_stack
     if self.mode == "interpolate" and np.any(self.interpolated_frames):
       self.interpolated_stack = self.interpolated_stack.astype("float32")
-    print(self.interpolated_frames.dtype)
     for s, e in zip(starts, ends):
       for i in range(s, e + 1):
         self.interpolate(i, s, e)
+    self.interpolated_frames = self.interpolated_frames.tolist() # To support serialisation
 
 
 process_steps["Interpolate"] = Interpolate
