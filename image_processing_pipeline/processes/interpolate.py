@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import warnings
 
 from image_processing_pipeline.framework.process_step import AbstractProcessStep, process_steps
 
@@ -30,8 +32,6 @@ class Interpolate(AbstractProcessStep):
       case "common_footprint":
         self.interpolated_stack[i,:] = self.input_stack[s - 1, :] * self.input_stack[e + 1, :]
 
-
-
   def _execute(self):
     """
     Scans the input stack for missing frames (e.g. every pixel has a 0 value)
@@ -42,32 +42,57 @@ class Interpolate(AbstractProcessStep):
     - common_footprint: Replaces the missing frames by the common_footprint of the 
       surronding valid frames. This requires them to only consist of 0 and 1 values
     
-    Missing frames at the very beginning and end of the stack are ignored and no
-    extrapolation attempts are performed.  
+    Frames at he beginning and end are automatically done by the appropiate method (next or previous).  
     """
-    # Find missing frames
-    missing_frames = np.any(self.input_stack, axis=(1,2))
+    missing_frames = np.any(self.input_stack, axis=(1, 2))
+    missing_frames_index = np.where(~missing_frames)[0] + 1
+
     first_valid_frame = np.argmax(missing_frames)
-    last_valid_frame = missing_frames.size - np.argmax(missing_frames[::-1])
+    last_valid_frame = len(missing_frames) - np.argmax(missing_frames[::-1]) - 1
 
-    # Transform into prediction for interpolated frames, removing missing frames at the start / end
-    self.interpolated_frames = ~missing_frames
-    self.interpolated_frames[:first_valid_frame] = False
-    self.interpolated_frames[last_valid_frame:] = False
+    # Boolean mask of frames to interpolate
+    self.interpolated_frames = ~missing_frames  # True where frame is missing
 
-    # Find where the value changes (from False to True or True to False)
+    # Now compute block transitions
     diffs = np.diff(self.interpolated_frames.astype(int))
     starts = np.where(diffs == 1)[0] + 1
     ends = np.where(diffs == -1)[0]
 
-    # Interpolate
+    # Catch case where start/end of array is missing
+    if self.interpolated_frames[0]:
+        starts = np.insert(starts, 0, 0)
+    if self.interpolated_frames[-1]:
+        ends = np.append(ends, len(self.interpolated_frames) - 1)
+
+    # Warn if any missing
+    if len(missing_frames_index) > 0:
+        warnings.warn(
+            f"Missing frames '{missing_frames_index}'. "
+            "Some values were interpolated - does not need to be rectified further",
+            UserWarning
+        )
+
     self.interpolated_stack = self.input_stack
     if self.mode == "interpolate" and np.any(self.interpolated_frames):
-      self.interpolated_stack = self.interpolated_stack.astype("float32")
-    for s, e in zip(starts, ends):
-      for i in range(s, e + 1):
-        self.interpolate(i, s, e)
-    self.interpolated_frames = self.interpolated_frames.tolist() # To support serialisation
+        self.interpolated_stack = self.interpolated_stack.astype("float32")
 
+    # Run interpolation
+    for s, e in zip(starts, ends):
+        for i in range(s, e + 1):
+            if i < first_valid_frame:
+                original_mode = self.mode
+                self.mode = "next"
+                self.interpolate(i, s, e)
+                self.mode = original_mode
+            elif i > last_valid_frame:
+                original_mode = self.mode
+                self.mode = "previous"
+                self.interpolate(i, s, e)
+                self.mode = original_mode
+            else:
+                self.interpolate(i, s, e)
+
+    # Convert for serialization
+    self.interpolated_frames = self.interpolated_frames.tolist()
 
 process_steps["Interpolate"] = Interpolate
