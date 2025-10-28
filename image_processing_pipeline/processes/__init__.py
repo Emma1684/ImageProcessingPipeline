@@ -19,4 +19,5 @@ import image_processing_pipeline.processes.number_adder
 import image_processing_pipeline.processes.remove_outliers
 import image_processing_pipeline.processes.remove_zero_pixels
 import image_processing_pipeline.processes.shrink_to_content
+import image_processing_pipeline.processes.star_fill
 import image_processing_pipeline.processes.threshold_binarise
