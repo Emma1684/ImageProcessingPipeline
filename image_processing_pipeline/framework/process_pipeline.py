@@ -2,7 +2,7 @@ import copy, math, yaml
 from pathlib import Path
 
 from image_processing_pipeline.framework.config import FrameworkConfig
-from image_processing_pipeline.framework.process_data import ProcessDataRegistry
+from image_processing_pipeline.framework.process_data import ProcessDataSerialiser
 from image_processing_pipeline.framework.serilisable_inputs import SerialisableInputs
 from image_processing_pipeline.framework.data_manager import data_managers
 from image_processing_pipeline.framework.process_step import process_steps
@@ -45,6 +45,7 @@ class ProcessPipeline(SerialisableInputs):
     self.config = self._load_config()
     self._validate_inputs()
     self.pipeline_steps = self._validate_pipeline_steps()
+    # TODO: validate Serialisations
 
   def _load_config(self) -> dict:
     """Load YAML configuration file."""
@@ -191,16 +192,11 @@ class ProcessPipeline(SerialisableInputs):
     finally:
       print("[" + (2*width + 1)*"=" + "] Saving results")
       
-      pdr = ProcessDataRegistry()
+      pds = ProcessDataSerialiser()
       serialisation_targets = self.config["Serialisations"]
       for target in serialisation_targets:
-        target_dir = self.output_dir / target["RelativeOutputPath"]
-        target_dir.mkdir(exist_ok=True, parents=True)
-
-        for data in target["Data"]:
-          if self.data_manager.contains(data):
-            obj = self.data_manager.get(data)
-            pdr.save(obj, name = data, dir = target_dir)
+        data = {key: self.data_manager.get(key) for key in target["Data"]}
+        pds.save(data, target, self.output_dir)
   
-  def serialise(self, path: Path):
+  def serialise(self, path):
     pass
