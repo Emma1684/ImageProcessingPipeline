@@ -195,7 +195,7 @@ class ProcessPipeline(SerialisableInputs):
       pds = ProcessDataSerialiser()
       serialisation_targets = self.config["Serialisations"]
       for target in serialisation_targets:
-        data = {key: self.data_manager.get(key) for key in target["Data"]}
+        data = {key: self.data_manager.get(key) for key in target["Data"] if self.data_manager.contains(key)}
         pds.save(data, target, self.output_dir)
   
   def serialise(self, path):
