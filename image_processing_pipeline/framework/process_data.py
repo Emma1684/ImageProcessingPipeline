@@ -2,13 +2,17 @@ import yaml
 import numpy as np
 import tifffile as tiff
 
+from abc import ABC, abstractmethod
 from pathlib import Path
 
-class ProcessData:
+from image_processing_pipeline.framework.data_manager import DataManager
+
+class AbstractProcessData(ABC):
   def __init__(self, data, name: str):
     self.data = data
     self.name = name
 
+  @abstractmethod
   def _serialise(self, dir: Path):
     """
     Serialise the data.
@@ -18,7 +22,7 @@ class ProcessData:
     - implement a custom serialisation routine (e.g. save to a file)
       and return the path to the serialised data.
     """
-    return self.data
+    raise NotImplementedError("Subclasses must implement serialise method")
 
   def to_yaml(self, dir: Path, serialised_data):
     """
@@ -35,7 +39,7 @@ class ProcessData:
         },
         f
       )
-
+  
   def serialise(self, dir: Path):
     """
     Ensure dir exists, serialise data, and write YAML metadata.
@@ -46,6 +50,17 @@ class ProcessData:
 
     serialised_data = self._serialise(dir)
     self.to_yaml(dir, serialised_data)
+  
+  @abstractmethod
+  def load(yaml_file: Path):
+    raise NotImplementedError("Subclasses must implement load method")
+
+
+class CollectableProcessData(AbstractProcessData): pass
+
+class ProcessData(CollectableProcessData):
+  def _serialise(self, dir: Path):
+    return self.data
 
   @staticmethod
   def load(yaml_file: Path):
@@ -66,7 +81,7 @@ class ProcessData:
     return cls(data)
 
 
-class ProcessTiffData(ProcessData):
+class ProcessTiffData(AbstractProcessData):
   def __init__(self, data: np.ndarray, name: str):
     if not isinstance(data, np.ndarray):
       raise TypeError("ProcessTiffData expects a numpy.ndarray")
@@ -105,7 +120,7 @@ class ProcessTiffData(ProcessData):
 
 # --- Registry System ---
 
-class ProcessDataRegistry:
+class ProcessDataSerialiser:
   _instance = None
 
   def __new__(cls):
@@ -120,13 +135,29 @@ class ProcessDataRegistry:
   def get_data_cls(self, py_type: type):
     return self._registry.get(py_type, ProcessData)
 
-  def save(self, data, name: str, dir: Path):
+  def save(self, data: dict, details: dict, output_dir: Path):
     """
-    Save `data` with a suitable ProcessData wrapper.
+    Save entries of `data` with a suitable AbstractProcessData wrapper.
     """
-    wrapper_cls = self.get_data_cls(type(data))
-    wrapper = wrapper_cls(data, name)
-    wrapper.serialise(dir)
+    target_dir = output_dir / details["RelativeOutputPath"]
+    target_dir.mkdir(exist_ok=True, parents=True)
+
+    if "CollectTo" in details:
+      collection = {}
+      for k, v in data.items():
+        wrapper_cls = self.get_data_cls(type(v))
+        if issubclass(wrapper_cls, CollectableProcessData):
+          collection[k] = v
+        else:
+          wrapper = wrapper_cls(v, k)
+          wrapper.serialise(target_dir)
+      collectionWrapper = ProcessData(collection, details["CollectTo"])
+      collectionWrapper.serialise(target_dir)
+    else:
+      for k, v in data.items():
+        wrapper_cls = self.get_data_cls(type(v))
+        wrapper = wrapper_cls(v, k)
+        wrapper.serialise(target_dir)
 
   def load(self, yaml_file: Path):
     """
@@ -144,5 +175,5 @@ class ProcessDataRegistry:
     return wrapper_cls.load(yaml_file)
 
 # --- Register standard mappings ---
-process_data_registry = ProcessDataRegistry()
-process_data_registry.register(np.ndarray, ProcessTiffData)
+process_data_serialiser = ProcessDataSerialiser()
+process_data_serialiser.register(np.ndarray, ProcessTiffData)
