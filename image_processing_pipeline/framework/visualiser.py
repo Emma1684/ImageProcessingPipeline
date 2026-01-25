@@ -61,14 +61,36 @@ class Visualiser:
 
     for i in range(num_images):
       axes[i].hist(image_stack[i].ravel(), bins=bins, color='blue', alpha=0.7)
-      axes[i].set_title(f"Histogram {i+1}")
-      axes[i].set_xlabel("Pixel Intensity")
-      axes[i].set_ylabel("Frequency")
+      axes[i].set_title(f"Frame {i+1}")
+      #axes[i].set_xlabel("Intensity")
+      #axes[i].set_ylabel("Frequency")
       axes[i].set_yscale(yscale)
-    
+
+      axes[i].tick_params(axis='x', labelsize=7)
+      axes[i].tick_params(axis='y', labelsize=7)
+      #axes[i].tick_params(axis='x', labelrotation=45)
+      
+      xmax = image_stack[i].max()
+
+      # round min down to nearest power-of-10 or to zero
+      xmin_rounded = 0 
+
+      # round max up to nearest 10
+      xmax_rounded = int(np.ceil(xmax / 1000) * 1000)
+
+      # middle rounded
+      xmid_rounded = int((xmin_rounded + xmax_rounded) / 2)
+      axes[i].set_xticks([xmin_rounded, xmid_rounded, xmax_rounded])
+      axes[i].set_xticklabels([str(xmin_rounded), str(xmid_rounded), str(xmax_rounded)])
+
+
+
     for i in range(num_images, len(axes)):
       axes[i].axis('off')
-    
+
+     # Increase space between subplots
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+
     plt.suptitle(title)
     plt.tight_layout()
     plt.show()

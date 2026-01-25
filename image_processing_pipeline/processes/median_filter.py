@@ -7,7 +7,7 @@ class MedianFilter(AbstractProcessStep):
   inputs = {"input_stack": np.ndarray,}
   deliverables = {"filtered_stack": np.ndarray,}
 
-  options = {"iterations": (int, 1), "size": (int, 3),}
+  options = {"iterations": (int, 1), "size": (int, 5),}
 
   def _execute(self):
     """
