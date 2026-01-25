@@ -41,10 +41,12 @@ class Visualiser:
   @staticmethod
   def show_histograms(image_stack: np.ndarray, title: str = "Histograms", bins: int = 100, yscale: str = "log", layout: str = "row"):
     """Display histograms of pixel intensities for each image in the stack."""
+    if image_stack.ndim == 1:
+      image_stack = image_stack[np.newaxis, np.newaxis, ...]
     if image_stack.ndim == 2:
       image_stack = image_stack[np.newaxis, ...]
     if image_stack.ndim != 3:
-      raise ValueError("image_stack must be a 3D numpy array (num_images, height, width) or 2D (height, width).")
+      raise ValueError("image_stack must be a 3D numpy array (num_images, height, width), 2D (height, width), or 1D.")
     
     num_images = image_stack.shape[0]
     if layout == "row":

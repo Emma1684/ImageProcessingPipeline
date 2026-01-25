@@ -7,6 +7,7 @@ import image_processing_pipeline.processes.cull_boundary
 import image_processing_pipeline.processes.extract_dimensions
 import image_processing_pipeline.processes.extract_frames
 import image_processing_pipeline.processes.extract_objects
+import image_processing_pipeline.processes.extrapolate
 import image_processing_pipeline.processes.fourier_denoise
 import image_processing_pipeline.processes.generate_edge_mask
 import image_processing_pipeline.processes.geometry_filter_masks
