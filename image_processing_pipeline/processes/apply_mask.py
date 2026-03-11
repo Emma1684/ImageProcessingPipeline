@@ -22,10 +22,10 @@ class ApplyMask(AbstractProcessStep):
   
   def _get_mask_at_frame(self, frame_idx: int):
     
-    if self.input_stack.shape[0] == 1:
+   if self.input_stack.shape[0] == 1:
       mask_idx=1
-    else:
-      mask_idx = frame_idx * (self.mask_stack.shape[0] - 1) / (self.input_stack.shape[0] - 1)
+   else:
+    mask_idx = frame_idx * (self.mask_stack.shape[0] - 1) / (self.input_stack.shape[0] - 1)
     lower_idx = int(np.floor(mask_idx))
     upper_idx = int(np.ceil(mask_idx))
     if self.mode == "previous":
