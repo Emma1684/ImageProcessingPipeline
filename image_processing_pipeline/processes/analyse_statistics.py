@@ -41,8 +41,7 @@ class AnalyseStatistics(ApplyMask):
     """
     n = len(samples)
     if n == 0:
-      return 0
-     # raise ValueError("samples must be non-empty")
+      raise ValueError("samples must be non-empty")
 
     x = np.sort(samples)
     while n > 2:
@@ -77,26 +76,26 @@ class AnalyseStatistics(ApplyMask):
       self.weight.append(float(norm))
 
       if norm == 0:
-         self.std.append(0.0)
-         self.mean.append(0.0)
-         self.mode.append(0.0)
-         for quantile in self.quantiles:
-                self.quantiles[quantile].append(0.0)
-      
-      else:  
-        samples = np.asarray(self.input_stack[i][mask == 1]).flatten()
-        self.mean.append(float(np.sum(samples) / norm))
-        self.std.append(float(np.sqrt(np.sum((samples - self.mean[-1])**2) / norm)))
-
+        self.std.append(0.0)
+        self.mean.append(0.0)
+        self.mode.append(0.0)
         for quantile in self.quantiles:
-          self.quantiles[quantile].append(float(np.percentile(
-            samples, quantile, method="inverted_cdf"
-          )))
+          self.quantiles[quantile].append(0.0)
+        continue
+      
+      samples = np.asarray(self.input_stack[i][mask == 1]).flatten()
+      self.mean.append(float(np.sum(samples) / norm))
+      self.std.append(float(np.sqrt(np.sum((samples - self.mean[-1])**2) / norm)))
 
-        self.mode.append(float(self.half_sample_mode(samples)))
+      for quantile in self.quantiles:
+        self.quantiles[quantile].append(float(np.percentile(
+          samples, quantile, method="inverted_cdf"
+        )))
 
-      for quantile, values in self.quantiles.items():
-        setattr(self, f"q{quantile}", values)
+      self.mode.append(float(self.half_sample_mode(samples)))
+
+    for quantile, values in self.quantiles.items():
+      setattr(self, f"q{quantile}", values)
 
 
 process_steps["AnalyseStatistics"] = AnalyseStatistics
