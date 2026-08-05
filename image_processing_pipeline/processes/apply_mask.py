@@ -27,6 +27,10 @@ class ApplyMask(AbstractProcessStep):
     )
     lower_idx = int(np.floor(mask_idx))
     upper_idx = int(np.ceil(mask_idx))
+    
+   
+     
+  
     if self.mode == "previous":
       weight_upper = 0
     elif self.mode == "next":

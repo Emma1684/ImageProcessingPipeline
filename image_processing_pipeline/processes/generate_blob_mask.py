@@ -10,7 +10,6 @@ class GenerateBlobMask(AbstractProcessStep):
   options = { "blur_sigma": (float, 3.5), "core_thresh" : (float, 1.5), 
              "std_sustain": (int,5), "std_threshold": (float, 0.55),
              "halo_max_px" : (float,10.0), "halo_intensity_factor": (float,2.5),
-              "size_threshold" :(int,3)}
 
 
   @staticmethod
@@ -29,7 +28,6 @@ class GenerateBlobMask(AbstractProcessStep):
       std_vals = np.zeros(T, dtype=np.float32)
       for t in range(T):
           std_vals[t] = np.std(diff_stack[t])
-      print (std_vals)
       onset = T  # default: no onset detected
       for t in range(0, T - std_sustain + 1):
           if np.all(std_vals[t : t + std_sustain] > std_threshold

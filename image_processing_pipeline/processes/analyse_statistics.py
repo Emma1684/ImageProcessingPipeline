@@ -82,7 +82,6 @@ class AnalyseStatistics(ApplyMask):
         for quantile in self.quantiles:
           self.quantiles[quantile].append(0.0)
         continue
-      
       samples = np.asarray(self.input_stack[i][mask == 1]).flatten()
       self.mean.append(float(np.sum(samples) / norm))
       self.std.append(float(np.sqrt(np.sum((samples - self.mean[-1])**2) / norm)))

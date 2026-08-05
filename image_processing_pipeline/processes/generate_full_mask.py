@@ -12,7 +12,6 @@ class GenerateFullMask(AbstractProcessStep):
     """
     if self.input_stack is None or self.input_stack.size == 0:
       raise ValueError("Input stack is empty, cannot generate mask")
-    self.mask_stack = np.ones_like(self.input_stack, dtype=np.uint8)
 
 
 
